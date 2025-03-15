@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <title>Interactive Scatter Plot</title>
+    </head>
+    <body>
+        <style>
+
+            .button-19 {
+            appearance: button;
+            background-color: #1899D6;
+            border: solid transparent;
+            border-radius: 16px;
+            border-width: 0 0 4px;
+            box-sizing: border-box;
+            color: #FFFFFF;
+            cursor: pointer;
+            display: inline-block;
+            font-family: din-round,sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            line-height: 20px;
+            margin: 0;
+            outline: none;
+            overflow: visible;
+            padding: 13px 16px;
+            text-align: center;
+            text-transform: uppercase;
+            touch-action: manipulation;
+            transform: translateZ(0);
+            transition: filter .2s;
+            user-select: none;
+            -webkit-user-select: none;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 100%;
+            }
+
+            .button-19:after {
+            background-clip: padding-box;
+            background-color: #1CB0F6;
+            border: solid transparent;
+            border-radius: 16px;
+            border-width: 0 0 4px;
+            bottom: -4px;
+            content: "";
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: -1;
+            }
+
+            .button-19,
+            .button-19:focus {
+            user-select: auto;
+            }
+
+            .button-19:hover:not(:disabled) {
+            filter: brightness(1.1);
+            -webkit-filter: brightness(1.1);
+            }
+
+            .button-19:disabled {
+            cursor: auto;
+            }
+
+            .button-19:active {
+            border-width: 4px 0 0;
+            background: none;
+            }
+
+            html {
+                scroll-behavior: smooth;
+                scroll-padding-top: 5px;
+                height: 100%;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            }
+
+            .dropdowns {
+                border-radius: 10px;
+                padding: 5%;
+                justify-content: center;
+                align-items: center;
+                display: grid;
+                row-gap: 10px;
+            }
+
+            .dropdown {
+            appearance: button;
+            background-color: #1899D6;
+            border: solid transparent;
+            border-radius: 16px;
+            border-width: 0 0 4px;
+            box-sizing: border-box;
+            color: #FFFFFF;
+            cursor: pointer;
+            display: inline-block;
+            font-family: din-round,sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .8px;
+            line-height: 20px;
+            margin: 0;
+            outline: none;
+            overflow: visible;
+            padding: 13px 16px;
+            text-align: center;
+            text-transform: uppercase;
+            touch-action: manipulation;
+            transform: translateZ(0);
+            transition: filter .2s;
+            user-select: none;
+            -webkit-user-select: none;
+            vertical-align: middle;
+            white-space: nowrap;
+            width: 100%;
+            }
+
+        </style>
+
+        <br> 
+        <br> 
+
+        <div style="justify-content: center; padding-left: 10%; padding-right: 10%; padding-bottom: 0%;"> 
+            <h2> Choose plotting attributes </h2> 
+            <p> 
+                Column names of the submitted file(s) have been auto-converted to plottable attributes. Select the X and Y axis features to plot and click generate graph! 
+                <br> 
+                <br> 
+                Tip: You can click on each scatter plot point to automatically look it up on GeneCards. Note, this website is not affiliated with Gene cards in any way. 
+            </p>
+            <br> 
+            <h2> How it works </h2> 
+            <p> 
+                Each file submitted is scanned for SNP rsids, and each rsid is treated as a seperate SNP. Each column is taken as a plottable feature of the SNP, and the value associated with it. 
+                <br> 
+                <br> 
+                SNPs from both files are merged, and if the same SNP occurs in both of them with different values for the same feature, the most recent file is prioritised. 
+                <br> 
+                <br> 
+                E.g., if file 1 has SNP rsid 999 with pvalue 0.01 and file 2 has SNP rsid 999 with pvalue 0.02, 0.02 would be saved as the SNP's pvalue. 
+            </p>
+        </div> 
+
+        <div style="padding: 10%; padding-top: 0%">
+            <div class="dropdowns">
+                <div class="dropdown">
+                    <label for="options1">Choose X Axis Attribute</label>
+                    <select id="options1" name="options1">
+                        <!-- Options for Dropdown 1 will be added here dynamically -->
+                    </select>
+                </div>
+                <br>
+                <div class="dropdown">
+                    <label for="options2">Choose Y Axis Attribute</label>
+                    <select id="options2" name="options2">
+                        <!-- Options for Dropdown 2 will be added here dynamically -->
+                    </select>
+                </div>
+                <br>
+                <div>
+                    <button class="button-19" onclick="generateGraph()">
+                        Generate Graph </button>
+                </div>
+            </div>
+        </div>
+        <canvas id="scatterChart"></canvas>
+
+        <script>
+
+        // Arrays of options for the two dropdowns
+
+        // Arrays of options for the two dropdowns
+        const optionsArray1 = {{ headings|safe }}
+        const optionsArray2 = {{ headings|safe }}
+
+        // Function to dynamically populate a dropdown
+        function populateDropdown(selectElement, options) {
+            // Clear any existing options
+            selectElement.innerHTML = '';
+
+            // Add new options dynamically
+            options.forEach(optionText => {
+                const option = document.createElement('option');
+                option.value = optionText.toLowerCase().replace(/\s+/g, ''); // Remove spaces for value
+                option.textContent = optionText;
+                selectElement.appendChild(option);
+            });
+        }
+
+        let scatterChart = null; // Store chart instance globally
+
+        function generateGraph() {
+            let snps_to_plot = [];
+            let snp_data = {{ snp_data|safe }}
+
+            var selectedX = document.getElementById("options1").value;
+            var selectedY = document.getElementById("options2").value;
+
+            for (let key in snp_data) {
+                if (selectedX in snp_data[key] && selectedY in snp_data[key]) {
+                    snps_to_plot.push({
+                        x: snp_data[key][selectedX],
+                        y: snp_data[key][selectedY],
+                        id: key,
+                    });
+                }
+            }
+
+            const scatterData = {
+                datasets: [{
+                    label: 'Scatter Dataset',
+                    data: snps_to_plot,
+                    backgroundColor: 'blue',
+                    pointRadius: 6
+                }]
+            };
+
+            // Destroy existing chart if it exists
+            if (scatterChart) {
+                scatterChart.destroy();
+            }
+
+            // Create new chart
+            const ctx = document.getElementById('scatterChart').getContext('2d');
+            scatterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: scatterData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            usePointStyle: true,
+                            callbacks: {
+                            label: function(tooltipItem) {
+                                // Custom hover data
+                                var label = tooltipItem.dataset.label || '';
+                                var xValue = tooltipItem.raw.x;
+                                var yValue = tooltipItem.raw.y;
+                                var customData = tooltipItem.raw.id; // Custom data you added
+
+                                return `rsid ${customData}, ${selectedX}: ${xValue}, ${selectedY}: ${yValue}`; 
+                                }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const datasetIndex = elements[0].datasetIndex;
+                            const index = elements[0].index;
+                            const point = scatterData.datasets[datasetIndex].data[index];
+                            window.open(`https://www.genecards.org/Search/Keyword?queryString=${point.id}`, "_blank");
+                        }
+                    }
+                }
+            });
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+
+        // Get the select elements
+        const selectElement1 = document.getElementById('options1');
+        const selectElement2 = document.getElementById('options2');
+
+
+        // Call the function to populate both dropdowns
+        populateDropdown(selectElement1, optionsArray1);
+        populateDropdown(selectElement2, optionsArray2);
+    </script>
+    </body>
+</html>
