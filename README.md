@@ -1,5 +1,5 @@
 # QuickPlot
-Files for the website by the same name hosted at shanksmakesstuff.pythonanywhere.com/ 
+Files for the website by the same name hosted at <a href="shanksmakesstuff.pythonanywhere.com/"> shanksmakesstuff.pythonanywhere.com/ </a> 
 
 # Disclaimer for QuickPlot
 
