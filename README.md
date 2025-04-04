@@ -1,3 +1,6 @@
+# Deprecated 
+This repository has been superceded by my project: https://www.gwasexplorer.com/ 
+
 # QuickPlot
 Files for the website by the name ofgwasexlorer.com hosted at <a href="https://shanksmakesstuff.pythonanywhere.com/"> shanksmakesstuff.pythonanywhere.com/ </a> 
 
